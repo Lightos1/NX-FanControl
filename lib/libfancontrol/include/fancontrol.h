@@ -27,7 +27,7 @@ typedef struct
     float   fanLevel_f;
 } TemperaturePoint;
 
-void WriteConfigFile(TemperaturePoint *table);
+void WriteConfigFile(const TemperaturePoint *table);
 void ReadConfigFile(TemperaturePoint **table_out);
 
 void InitFanController(TemperaturePoint *table);
@@ -35,7 +35,7 @@ void FanControllerThreadFunction(void*);
 void StartFanControllerThread();
 void CloseFanControllerThread();
 void WaitFanController();
-void WriteLog(char *buffer);
+void WriteLog(const char *buffer);
 
 #ifdef __cplusplus
 }
