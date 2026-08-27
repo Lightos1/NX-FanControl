@@ -1,3 +1,6 @@
 [submodule "overlay/lib/libultrahand"]
 	path = overlay/lib/libultrahand
 	url = https://github.com/ppkantorski/libultrahand
+[submodule "overlay/lib/cJSON"]
+	path = overlay/lib/cJSON
+	url = https://github.com/DaveGamble/cJSON.git
