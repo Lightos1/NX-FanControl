@@ -43,9 +43,9 @@ APP_VERSION :=	1.0.5+
 TARGET		:=	$(APP_TITLE)
 BUILD		:=	build
 # Include libultrahand source directories
-SOURCES		:=	source lib/libultrahand/libultra/source lib/libultrahand/libtesla/source ../lib/cJSON
+SOURCES		:=	source lib/libultrahand/libultra/source lib/libultrahand/libtesla/source ../lib/cJSON ../common/source
 DATA		:=	data
-INCLUDES	:=	include source lib/libultrahand/libultra/include lib/libultrahand/libtesla/include ../lib/libfancontrol/include ../lib/cJSON
+INCLUDES	:=	include source lib/libultrahand/libultra/include lib/libultrahand/libtesla/include ../common/include ../lib/cJSON
 
 NO_ICON		:=  1
 
@@ -77,7 +77,7 @@ ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map) -Wl,--allow-multiple-definition
 
 # Fixed library linking - removed non-existent libraries and used correct library paths
-LIBS	:= -lcurl -lz -lzzip -lmbedtls -lmbedx509 -lmbedcrypto -ljansson -lnx ../../lib/libfancontrol/lib/libfancontrol.a -lstdc++ -lm
+LIBS	:= -lcurl -lz -lzzip -lmbedtls -lmbedx509 -lmbedcrypto -ljansson -lnx -lstdc++ -lm
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
@@ -200,7 +200,7 @@ DEPENDS	:=	$(OFILES:.o=.d)
 #---------------------------------------------------------------------------------
 all	:	 $(OUTPUT).ovl
 
-$(OUTPUT).ovl		:	$(OUTPUT).elf $(OUTPUT).nacp 
+$(OUTPUT).ovl		:	$(OUTPUT).elf $(OUTPUT).nacp
 	@elf2nro $< $@ $(NROFLAGS)
 	@echo "built ... $(notdir $(OUTPUT).ovl)"
 

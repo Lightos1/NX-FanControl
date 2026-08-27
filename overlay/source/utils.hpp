@@ -3,7 +3,6 @@
 #include <tesla.hpp>
 #include <switch.h>
 #include <stdio.h>
-#include <fancontrol.h>
 #include "pwm.h"
 
 #define SysFanControlID 0x00FF0000B378D640

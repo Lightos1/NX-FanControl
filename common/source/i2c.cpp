@@ -1,7 +1,4 @@
-#ifndef I2C_H
-#define I2C_H
-
-#include <switch.h>
+#include "fancontrol/i2c.hpp"
 
 Result I2cReadRegHandler16(u8 reg, I2cDevice dev, u16 *out)
 {
@@ -78,5 +75,3 @@ Result I2cReadRegHandler8(u8 reg, I2cDevice dev, u8 *out)
 	i2csessionClose(&_session);
 	return 0;
 }
-
-#endif

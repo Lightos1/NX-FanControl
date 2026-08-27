@@ -1,7 +1,8 @@
+#include <fancontrol.hpp>
 #include "select_menu.hpp"
 #include "utils.hpp"
 
-SelectMenu::SelectMenu(int i, TemperaturePoint* fanCurveTable, bool* tableIsChanged) 
+SelectMenu::SelectMenu(int i, TemperaturePoint* fanCurveTable, bool* tableIsChanged)
 {
     this->_i = i;
     this->_fanCurveTable = fanCurveTable;
@@ -40,9 +41,9 @@ tsl::elm::Element* SelectMenu::createUI(){
     stepFanL->setProgress(((int)((this->_fanCurveTable + this->_i)->fanLevel_f * 100)) / 5);
     list->addItem(stepFanL);
 
-    this->_saveBtn->setClickListener([this](uint64_t keys) 
+    this->_saveBtn->setClickListener([this](uint64_t keys)
     {
-	    if (keys & HidNpadButton_A) 
+	    if (keys & HidNpadButton_A)
         {
 		    WriteConfigFile(this->_fanCurveTable);
 
@@ -57,14 +58,14 @@ tsl::elm::Element* SelectMenu::createUI(){
                 u64 pid = 0;
                 pmshellLaunchProgram(0, &programLocation, &pid);
             }
-                
+
             this->_saveBtn->setText("Saved!");
             *this->_tableIsChanged = true;
 		    return true;
 		}
-		
+
         return false;
-		
+
     });
 
     list->addItem(this->_saveBtn);

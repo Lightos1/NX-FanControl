@@ -1,15 +1,15 @@
 #include <tesla.hpp>
-#include <fancontrol.h>
+#include <fancontrol.hpp>
 #include "utils.hpp"
 
-class MainMenu : public tsl::Gui 
+class MainMenu : public tsl::Gui
 {
 private:
     TemperaturePoint* _fanCurveTable;
     bool _tableIsChanged;
 
     tsl::elm::ToggleListItem* _enabledBtn;
-    
+
     // Real-time monitoring labels
     tsl::elm::ListItem* _socTempLabel;
     tsl::elm::ListItem* _fanSpeedLabel;

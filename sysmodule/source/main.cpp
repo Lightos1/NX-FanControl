@@ -1,4 +1,4 @@
-#include "fancontrol.h"
+#include "fan/fancontrol.hpp"
 
 // Size of the inner heap (50kb).
 #define INNER_HEAP_SIZE 0xC800
@@ -45,7 +45,7 @@ void __appInit(void)
 
     rc = fsInitialize();
     if (R_FAILED(rc))
-        diagAbortWithResult(MAKERESULT(Module_Libnx, LibnxError_InitFail_FS));       
+        diagAbortWithResult(MAKERESULT(Module_Libnx, LibnxError_InitFail_FS));
 
     rc = fsdevMountSdmc();;
     if (R_FAILED(rc))
@@ -80,7 +80,7 @@ void __appExit(void)
 int main(int argc, char* argv[])
 {
     TemperaturePoint *table;
-    
+
     ReadConfigFile(&table);
     InitFanController(table);
     StartFanControllerThread();

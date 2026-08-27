@@ -1,31 +1,13 @@
-#include "fancontrol.h"
-#include "tmp451.h"
-#include <stdatomic.h>
+#include <fancontrol.hpp>
+#include "fancontrol.hpp"
+#include <atomic>
 #include <math.h>
-
-/* ── Fan curve table (10 presets) ─────────────────────────────────── */
-
-const TemperaturePoint defaultTable[] =
-{
-    { .temperature_c = 25,  .fanLevel_f = 0.10f },
-    { .temperature_c = 30,  .fanLevel_f = 0.20f },
-    { .temperature_c = 35,  .fanLevel_f = 0.30f },
-    { .temperature_c = 40,  .fanLevel_f = 0.40f },
-    { .temperature_c = 45,  .fanLevel_f = 0.50f },
-    { .temperature_c = 50,  .fanLevel_f = 0.60f },
-    { .temperature_c = 55,  .fanLevel_f = 0.70f },
-    { .temperature_c = 60,  .fanLevel_f = 0.80f },
-    { .temperature_c = 65,  .fanLevel_f = 0.90f },
-    { .temperature_c = 70,  .fanLevel_f = 1.00f },
-};
-
-#define TABLE_ENTRIES  (sizeof(defaultTable) / sizeof(defaultTable[0]))
 
 /* ── State ────────────────────────────────────────────────────────── */
 
 TemperaturePoint     *fanControllerTable;
 Thread                FanControllerThread;
-static atomic_bool    fanControllerThreadExit = false;
+static std::atomic_bool fanControllerThreadExit{false};
 
 /* ── Tuning constants ─────────────────────────────────────────────── */
 
@@ -33,116 +15,6 @@ static atomic_bool    fanControllerThreadExit = false;
 #define POLL_FAST_NS       25000000ULL   /*  25 ms – when temp is high    */
 #define TEMP_FAST_THRESH        55.0f    /* switch to fast poll above this */
 #define TEMP_READ_RETRIES         3
-
-/* ── CreateDir ────────────────────────────────────────────────────── */
-
-void CreateDir(char *dir)
-{
-    char buf[PATH_MAX];
-    size_t len = strlen(dir);
-
-    if (len == 0)
-        return;
-    if (len >= PATH_MAX)
-        len = PATH_MAX - 1;
-
-    memcpy(buf, dir, len);
-    buf[len] = '\0';
-
-    for (size_t i = 1; i <= len; i++)
-    {
-        if (buf[i] == '/' || buf[i] == '\0')
-        {
-            char saved = buf[i];
-            buf[i] = '\0';
-            if (access(buf, F_OK) == -1)
-                mkdir(buf, 0777);
-            buf[i] = saved;
-        }
-    }
-}
-
-/* ── Logging ──────────────────────────────────────────────────────── */
-
-void InitLog(void)
-{
-    if (access(LOG_DIR, F_OK) == -1)
-        CreateDir(LOG_DIR);
-
-    if (access(LOG_FILE, F_OK) != -1)
-        remove(LOG_FILE);
-}
-
-void WriteLog(const char *buffer)
-{
-    FILE *log = fopen(LOG_FILE, "a");
-    if (log == NULL)
-        return;
-    fprintf(log, "%s\n", buffer);
-    fclose(log);
-}
-
-/* ── Config persistence ───────────────────────────────────────────── */
-
-void WriteConfigFile(const TemperaturePoint *table)
-{
-    const TemperaturePoint *src = table ? table : defaultTable;
-
-    if (access(CONFIG_DIR, F_OK) == -1)
-        CreateDir(CONFIG_DIR);
-
-    FILE *config = fopen(CONFIG_FILE, "w");
-    if (config == NULL)
-    {
-        WriteLog("WriteConfigFile: fopen failed");
-        return;
-    }
-    fwrite(src, 1, TABLE_SIZE, config);
-    fclose(config);
-}
-
-void ReadConfigFile(TemperaturePoint **table_out)
-{
-    InitLog();
-
-    *table_out = malloc(sizeof(defaultTable));
-    if (*table_out == NULL)
-    {
-        WriteLog("ReadConfigFile: malloc failed");
-        diagAbortWithResult(MAKERESULT(Module_Libnx, LibnxError_ShouldNotHappen));
-    }
-    memcpy(*table_out, defaultTable, sizeof(defaultTable));
-
-    if (access(CONFIG_DIR, F_OK) == -1)
-    {
-        CreateDir(CONFIG_DIR);
-        WriteConfigFile(NULL);
-        WriteLog("Missing config dir");
-        return;
-    }
-
-    if (access(CONFIG_FILE, F_OK) == -1)
-    {
-        WriteConfigFile(NULL);
-        WriteLog("Missing config file");
-        return;
-    }
-
-    FILE *config = fopen(CONFIG_FILE, "r");
-    if (config == NULL)
-    {
-        WriteLog("ReadConfigFile: fopen failed, using defaults");
-        return;
-    }
-
-    if (fread(*table_out, 1, TABLE_SIZE, config) != TABLE_SIZE)
-    {
-        WriteLog("ReadConfigFile: short read, using defaults");
-        memcpy(*table_out, defaultTable, sizeof(defaultTable));
-    }
-    fclose(config);
-    WriteLog("config file exist");
-}
 
 /* ── Interpolation ────────────────────────────────────────────────── */
 
@@ -194,7 +66,7 @@ void FanControllerThreadFunction(void *arg)
         diagAbortWithResult(MAKERESULT(Module_Libnx, LibnxError_ShouldNotHappen));
     }
 
-    while (!atomic_load_explicit(&fanControllerThreadExit, memory_order_relaxed))
+    while (!fanControllerThreadExit.load(std::memory_order_relaxed))
     {
         /* ── Read temperature with retry ────────────────────────── */
         bool readOk = false;
@@ -249,7 +121,7 @@ void StartFanControllerThread(void)
 
 void CloseFanControllerThread(void)
 {
-    atomic_store_explicit(&fanControllerThreadExit, true, memory_order_release);
+    fanControllerThreadExit.store(true, std::memory_order_release);
 
     Result rs = threadWaitForExit(&FanControllerThread);
     if (R_FAILED(rs))
@@ -260,7 +132,7 @@ void CloseFanControllerThread(void)
 
     threadClose(&FanControllerThread);
 
-    atomic_store_explicit(&fanControllerThreadExit, false, memory_order_relaxed);
+    fanControllerThreadExit.store(false, std::memory_order_relaxed);
 
     free(fanControllerTable);
     fanControllerTable = NULL;
