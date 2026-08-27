@@ -38,14 +38,14 @@ include $(DEVKITPRO)/libnx/switch_rules
 #   NACP building is skipped as well.
 #---------------------------------------------------------------------------------
 APP_TITLE	:=	NX-FanControl
-APP_VERSION :=	1.0.5+
+APP_VERSION :=	1.1.0
 
 TARGET		:=	$(APP_TITLE)
 BUILD		:=	build
 # Include libultrahand source directories
-SOURCES		:=	source lib/libultrahand/libultra/source lib/libultrahand/libtesla/source ../lib/cJSON ../common/source
+SOURCES		:=	source lib/libultrahand/libultra/source lib/libultrahand/libtesla/source lib/cJSON ../common/source
 DATA		:=	data
-INCLUDES	:=	include source lib/libultrahand/libultra/include lib/libultrahand/libtesla/include ../common/include ../lib/cJSON
+INCLUDES	:=	include source lib/libultrahand/libultra/include lib/libultrahand/libtesla/include lib/cJSON ../common/include
 
 NO_ICON		:=  1
 
@@ -77,7 +77,7 @@ ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map) -Wl,--allow-multiple-definition
 
 # Fixed library linking - removed non-existent libraries and used correct library paths
-LIBS	:= -lcurl -lz -lzzip -lmbedtls -lmbedx509 -lmbedcrypto -ljansson -lnx -lstdc++ -lm
+LIBS	:= -lnx -lstdc++ -lm
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
@@ -102,7 +102,7 @@ export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
 # Exclude test files from compilation
-CFILES		:=	$(foreach dir,$(SOURCES),$(filter-out test.c,$(notdir $(wildcard $(dir)/*.c))))
+CFILES		:=	$(foreach dir,$(SOURCES),$(filter-out test.c cJSON_Utils.c,$(notdir $(wildcard $(dir)/*.c))))
 CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
 SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
 BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
