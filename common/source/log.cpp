@@ -1,15 +1,15 @@
 #include <fancontrol.hpp>
 
-#include <sys/syslimits.h>
+#define FC_PATH_MAX 64
 
 void CreateDir(const char *dir) {
-    char buf[PATH_MAX];
+    char buf[FC_PATH_MAX];
     size_t len = strlen(dir);
 
     if (len == 0)
         return;
-    if (len >= PATH_MAX)
-        len = PATH_MAX - 1;
+    if (len >= FC_PATH_MAX)
+        len = FC_PATH_MAX - 1;
 
     memcpy(buf, dir, len);
     buf[len] = '\0';
@@ -37,6 +37,7 @@ void WriteLog(const char *buffer) {
     FILE *log = fopen(FC_LOG_FILE, "a");
     if (log == NULL)
         return;
-    fprintf(log, "%s\n", buffer);
+    fputs(buffer, log);
+    fputc('\n', log);
     fclose(log);
 }

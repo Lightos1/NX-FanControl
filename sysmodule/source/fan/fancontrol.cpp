@@ -5,8 +5,8 @@
 #include <math.h>
 #include <sys/stat.h>
 
-TemperaturePoint     *fanControllerTable;
-Thread                FanControllerThread;
+TemperaturePoint *fanControllerTable;
+Thread           FanControllerThread;
 
 #define POLL_NORMAL_NS     50000000ULL
 #define POLL_FAST_NS       25000000ULL
