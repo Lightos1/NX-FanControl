@@ -9,3 +9,5 @@ void FanControllerThreadFunction(void*);
 void StartFanControllerThread();
 void CloseFanControllerThread();
 void WaitFanController();
+void SortFanCurveTable(TemperaturePoint *table);
+bool ValidateFanCurveTable(const TemperaturePoint *table);

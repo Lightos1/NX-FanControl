@@ -8,16 +8,13 @@
 #define TMP451_SOC_TEMP_DEC_REG 0x10
 #define TMP451_PCB_TEMP_DEC_REG 0x15
 
-// Forward declarations
 Result I2cReadRegHandler8(u8 reg, I2cDevice dev, u8 *out);
 
-static inline Result Tmp451ReadReg(u8 reg, u8 *out)
-{
+static inline Result Tmp451ReadReg(u8 reg, u8 *out) {
 	u8 data = 0;
 	Result res = I2cReadRegHandler8(reg, I2cDevice_Tmp451, &data);
 
-	if (R_FAILED(res))
-	{
+	if (R_FAILED(res)) {
 		return res;
 	}
 
@@ -35,7 +32,7 @@ static inline Result Tmp451GetSocTemp(float* temperature) {
     rc = Tmp451ReadReg(TMP451_SOC_TEMP_DEC_REG, &decimals);
     if (R_FAILED(rc))
         return rc;
-    
+
     decimals = ((u16)(decimals >> 4) * 625) / 100;
     *temperature = (float)(integer) + ((float)(decimals) / 100);
     return rc;
@@ -51,7 +48,7 @@ static inline Result Tmp451GetPcbTemp(float* temperature) {
     rc = Tmp451ReadReg(TMP451_PCB_TEMP_DEC_REG, &decimals);
     if (R_FAILED(rc))
         return rc;
-    
+
     decimals = ((u16)(decimals >> 4) * 625) / 100;
     *temperature = (float)(integer) + ((float)(decimals) / 100);
     return rc;

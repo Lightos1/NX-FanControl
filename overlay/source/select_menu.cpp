@@ -47,18 +47,6 @@ tsl::elm::Element* SelectMenu::createUI(){
         {
 		    WriteConfigFile(this->_fanCurveTable);
 
-            if(IsRunning() != 0)
-            {
-                pmshellTerminateProgram(SysFanControlID);
-                const NcmProgramLocation programLocation
-                {
-                    .program_id = SysFanControlID,
-                    .storageID = NcmStorageId_None,
-                };
-                u64 pid = 0;
-                pmshellLaunchProgram(0, &programLocation, &pid);
-            }
-
             this->_saveBtn->setText("Saved!");
             *this->_tableIsChanged = true;
 		    return true;

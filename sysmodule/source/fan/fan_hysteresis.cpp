@@ -1,4 +1,3 @@
-#pragma once
 #include <cmath>
 #include <fancontrol.hpp>
 #include "fan_hysteresis.hpp"
@@ -23,6 +22,9 @@ static inline float InterpolateFanLevel(const TemperaturePoint *tbl, float tempC
             }
 
             float dT = tbl[i + 1].temperature_c - tbl[i].temperature_c;
+            if (dT <= 0.0f) {
+                return tbl[i + 1].fanLevel_f;
+            }
             float dF = tbl[i + 1].fanLevel_f    - tbl[i].fanLevel_f;
             float t  = (tempC - tbl[i].temperature_c) / dT;
             return tbl[i].fanLevel_f + dF * t;
@@ -49,4 +51,9 @@ float UpdateFanHysteresis(FanHysteresisState *state, float tempC) {
     }
 
     return state->lastLevel;
+}
+
+void RebindFanHysteresisTable(FanHysteresisState *state, const TemperaturePoint *newTable) {
+    state->tbl     = newTable;
+    state->hasLast = false;
 }

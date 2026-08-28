@@ -1,33 +1,25 @@
 #include "fan/fancontrol.hpp"
 
-// Size of the inner heap (50kb).
 #define INNER_HEAP_SIZE 0xC800
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// Sysmodules should not use applet*.
 u32 __nx_applet_type = AppletType_None;
 
-// Sysmodules will normally only want to use one FS session.
 u32 __nx_fs_num_sessions = 1;
 
-// Newlib heap configuration function (makes malloc/free work).
-void __libnx_initheap(void)
-{
+void __libnx_initheap(void) {
     static u8 inner_heap[INNER_HEAP_SIZE];
     extern void* fake_heap_start;
     extern void* fake_heap_end;
 
-    // Configure the newlib heap.
     fake_heap_start = inner_heap;
     fake_heap_end   = inner_heap + sizeof(inner_heap);
 }
 
-// Service initialization.
-void __appInit(void)
-{
+void __appInit(void) {
     Result rc;
 
     rc = smInitialize();
@@ -62,9 +54,7 @@ void __appInit(void)
     smExit();
 }
 
-// Service deinitialization.
-void __appExit(void)
-{
+void __appExit(void) {
     CloseFanControllerThread();
     fanExit();
     i2cExit();
@@ -76,12 +66,18 @@ void __appExit(void)
 }
 #endif
 
-// Main program entrypoint
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
     TemperaturePoint *table;
 
+    InitLog();
     ReadConfigFile(&table);
+    SortFanCurveTable(table);
+
+    if (!ValidateFanCurveTable(table)) {
+        WriteLog("Invalid config!");
+        memcpy(table, defaultTable, sizeof(defaultTable));
+    }
+
     InitFanController(table);
     StartFanControllerThread();
     WaitFanController();

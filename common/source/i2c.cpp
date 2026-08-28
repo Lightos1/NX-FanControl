@@ -1,7 +1,6 @@
 #include "fancontrol/i2c.hpp"
 
-Result I2cReadRegHandler16(u8 reg, I2cDevice dev, u16 *out)
-{
+Result I2cReadRegHandler16(u8 reg, I2cDevice dev, u16 *out) {
 	struct readReg {
         u8 send;
         u8 sendLength;
@@ -27,8 +26,7 @@ Result I2cReadRegHandler16(u8 reg, I2cDevice dev, u16 *out)
     };
 
 	res = i2csessionExecuteCommandList(&_session, &val, sizeof(val), &readRegister, sizeof(readRegister));
-	if (res)
-	{
+	if (res) {
 		i2csessionClose(&_session);
 		return res;
 	}
@@ -38,8 +36,7 @@ Result I2cReadRegHandler16(u8 reg, I2cDevice dev, u16 *out)
 	return 0;
 }
 
-Result I2cReadRegHandler8(u8 reg, I2cDevice dev, u8 *out)
-{
+Result I2cReadRegHandler8(u8 reg, I2cDevice dev, u8 *out) {
 	struct readReg {
         u8 send;
         u8 sendLength;
@@ -65,8 +62,7 @@ Result I2cReadRegHandler8(u8 reg, I2cDevice dev, u8 *out)
     };
 
 	res = i2csessionExecuteCommandList(&_session, &val, sizeof(val), &readRegister, sizeof(readRegister));
-	if (res)
-	{
+	if (res) {
 		i2csessionClose(&_session);
 		return res;
 	}
