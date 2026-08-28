@@ -17,17 +17,6 @@ u64 IsRunning() {
     return pid;
 }
 
-void RemoveB2F()
-{
-    remove(SysFanControlB2FPath);
-}
-
-void CreateB2F()
-{
-    FILE *f = fopen(SysFanControlB2FPath, "w");
-    if (f) fclose(f);
-}
-
 bool InitializeSensors() {
     if (g_sensorsInitialized) return true;
 
@@ -84,7 +73,7 @@ float GetFanSpeed() {
         u64 currentTick = armGetSystemTick();
         u64 ticksPerSecond = armGetSystemTickFreq();
 
-        // If we have a cached value from within the last 2 seconds, use it
+        // If we have a cached value from within the last 2 CreateB2F, use it
         if (g_lastValidFanSpeed >= 0.0f &&
             (currentTick - g_lastValidFanSpeedTime) < (ticksPerSecond * 2)) {
             return g_lastValidFanSpeed;

@@ -39,18 +39,10 @@ tsl::elm::Element* MainMenu::createUI() {
     auto list = new tsl::elm::List();
 
     this->_enabledBtn->setStateChangedListener([this](bool state) {
+        /* todo */
         if (state) {
-            CreateB2F();
-            const NcmProgramLocation programLocation{
-                .program_id = SysFanControlID,
-                .storageID = NcmStorageId_None,
-            };
-            u64 pid = 0;
-            pmshellLaunchProgram(0, &programLocation, &pid);
             return true;
         } else {
-            RemoveB2F();
-            pmshellTerminateProgram(SysFanControlID);
             return true;
         }
         return false;

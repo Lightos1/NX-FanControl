@@ -1,6 +1,6 @@
 #include "fan/fancontrol.hpp"
 
-#define INNER_HEAP_SIZE 0xC800
+#define INNER_HEAP_SIZE 0x1110
 
 #ifdef __cplusplus
 extern "C" {
@@ -55,7 +55,7 @@ void __appInit(void) {
 }
 
 void __appExit(void) {
-    CloseFanControllerThread();
+    CleanupFanController();
     fanExit();
     i2cExit();
     fsExit();
@@ -79,8 +79,9 @@ int main(int argc, char* argv[]) {
     }
 
     InitFanController(table);
-    StartFanControllerThread();
-    WaitFanController();
+    LoopFanController();
+
+    __builtin_unreachable();
 
     return 0;
 }

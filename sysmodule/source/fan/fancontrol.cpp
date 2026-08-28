@@ -8,7 +8,6 @@
 
 TemperaturePoint     *fanControllerTable;
 Thread                FanControllerThread;
-static std::atomic_bool fanControllerThreadExit{false};
 
 #define POLL_NORMAL_NS     50000000ULL
 #define POLL_FAST_NS       25000000ULL
@@ -18,11 +17,6 @@ static std::atomic_bool fanControllerThreadExit{false};
 
 void InitFanController(TemperaturePoint *table) {
     fanControllerTable = table;
-
-    if (R_FAILED(threadCreate(&FanControllerThread, FanControllerThreadFunction, NULL, NULL, 0x4000, 0x3F, -2))) {
-        WriteLog("Error creating FanControllerThread");
-        diagAbortWithResult(MAKERESULT(Module_Libnx, LibnxError_ShouldNotHappen));
-    }
 }
 
 void SortFanCurveTable(TemperaturePoint *tbl) {
@@ -102,11 +96,9 @@ static void RefreshConfig(FanHysteresisState *fanState) {
     }
 }
 
-void FanControllerThreadFunction(void *arg) {
-    (void) arg;
-
+void LoopFanController() {
     FanController fc;
-    float tempC        =  0.0f;
+    float tempC = 0.0f;
 
     Result rs = fanOpenController(&fc, 0x3D000001);
     if (R_FAILED(rs)) {
@@ -117,7 +109,7 @@ void FanControllerThreadFunction(void *arg) {
     FanHysteresisState fanState{};
     InitFanHysteresis(&fanState, fanControllerTable, 2.0f);
 
-    while (!fanControllerThreadExit.load(std::memory_order_relaxed)) {
+    for (;;) {
         RefreshConfig(&fanState);
 
         bool readOk = false;
@@ -145,37 +137,10 @@ void FanControllerThreadFunction(void *arg) {
         u64 interval = (tempC >= TEMP_FAST_THRESH) ? POLL_FAST_NS : POLL_NORMAL_NS;
         svcSleepThread(interval);
     }
-
-    fanControllerClose(&fc);
 }
 
-void StartFanControllerThread(void) {
-    if (R_FAILED(threadStart(&FanControllerThread))) {
-        WriteLog("Error starting FanControllerThread");
-        diagAbortWithResult(MAKERESULT(Module_Libnx, LibnxError_ShouldNotHappen));
-    }
-}
-
-void CloseFanControllerThread(void) {
-    fanControllerThreadExit.store(true, std::memory_order_release);
-
-    Result rs = threadWaitForExit(&FanControllerThread);
-    if (R_FAILED(rs)) {
-        WriteLog("Error waiting fanControllerThread");
-        diagAbortWithResult(MAKERESULT(Module_Libnx, LibnxError_ShouldNotHappen));
-    }
-
-    threadClose(&FanControllerThread);
-
-    fanControllerThreadExit.store(false, std::memory_order_relaxed);
-
+/* This should never be called, but just in case */
+void CleanupFanController() {
     free(fanControllerTable);
     fanControllerTable = NULL;
-}
-
-void WaitFanController(void) {
-    if (R_FAILED(threadWaitForExit(&FanControllerThread))) {
-        WriteLog("Error waiting fanControllerThread");
-        diagAbortWithResult(MAKERESULT(Module_Libnx, LibnxError_ShouldNotHappen));
-    }
 }
