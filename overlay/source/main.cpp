@@ -7,12 +7,10 @@
 class NxFanControlOverlay : public tsl::Overlay {
 public:
     virtual void initServices() override {
-        // Tesla handles all the display/resolution setup automatically
-        // You only initialize YOUR services here
         fsdevMountSdmc();
         pmshellInitialize();
     }
-    
+
     virtual void exitServices() override {
         fsdevUnmountAll();
         pmshellExit();
@@ -24,7 +22,5 @@ public:
 };
 
 int main(int argc, char **argv) {
-    // Tesla handles ALL the initialization, key combo detection, resolution, etc.
-    // Your overlay just provides the GUI
     return tsl::loop<NxFanControlOverlay>(argc, argv);
 }

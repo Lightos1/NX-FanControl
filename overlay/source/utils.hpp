@@ -12,7 +12,6 @@ u64 IsRunning();
 void CreateB2F();
 void RemoveB2F();
 
-// Add temperature and fan speed reading functions
 bool InitializeSensors();
 float GetSOCTemperature();
 float GetFanSpeed();

@@ -31,12 +31,10 @@ void CreateB2F()
 bool InitializeSensors() {
     if (g_sensorsInitialized) return true;
 
-    // Initialize I2C for temperature sensor
     if (R_FAILED(i2cInitialize())) {
         return false;
     }
 
-    // Initialize PWM for fan speed reading (exactly like Status Monitor)
     if (hosversionAtLeast(6,0,0) && R_SUCCEEDED(pwmInitialize())) {
         pwmCheck = pwmOpenSession2(&g_fanSession, 0x3D000001);
     }
@@ -59,7 +57,6 @@ float GetSOCTemperature() {
 float GetFanSpeed() {
     if (!g_sensorsInitialized) return -1.0f;
 
-    // Use Status Monitor's exact implementation with retry logic
     if (R_SUCCEEDED(pwmCheck)) {
         const int MAX_RETRIES = 3;
 
@@ -73,20 +70,17 @@ float GetFanSpeed() {
                 temp /= 10.0;
                 double fanSpeed = 100.0 - temp;
 
-                // Cache the valid reading
                 g_lastValidFanSpeed = (float)fanSpeed;
                 g_lastValidFanSpeedTime = armGetSystemTick();
 
                 return (float)fanSpeed;
             }
 
-            // Small delay before retry (about 1ms)
             if (retry < MAX_RETRIES - 1) {
                 svcSleepThread(1000000); // 1ms in nanoseconds
             }
         }
 
-        // All retries failed - check if we have a recent cached value
         u64 currentTick = armGetSystemTick();
         u64 ticksPerSecond = armGetSystemTickFreq();
 
