@@ -11,3 +11,6 @@ struct TemperaturePoint {
 #define TABLE_SIZE     (sizeof(TemperaturePoint) * TABLE_ENTRIES)
 
 extern const TemperaturePoint defaultTable[TABLE_ENTRIES];
+
+void SortFanCurveTable(TemperaturePoint *table);
+float InterpolateFanLevel(const TemperaturePoint *table, float temperature_c);

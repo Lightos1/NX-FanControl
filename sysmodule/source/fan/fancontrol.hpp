@@ -6,6 +6,5 @@
 
 void InitFanController(TemperaturePoint *table);
 void LoopFanController();
-void SortFanCurveTable(TemperaturePoint *table);
 bool ValidateFanCurveTable(const TemperaturePoint *table);
 void CleanupFanController();

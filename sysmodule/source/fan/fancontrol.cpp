@@ -1,5 +1,4 @@
 #include <fancontrol.hpp>
-#include <algorithm>
 #include "fancontrol.hpp"
 #include "fan_hysteresis.hpp"
 #include <atomic>
@@ -17,10 +16,6 @@ Thread                FanControllerThread;
 
 void InitFanController(TemperaturePoint *table) {
     fanControllerTable = table;
-}
-
-void SortFanCurveTable(TemperaturePoint *tbl) {
-    std::sort(tbl, tbl + TABLE_ENTRIES, [](const TemperaturePoint &a, const TemperaturePoint &b) { return a.temperature_c < b.temperature_c; });
 }
 
 bool ValidateFanCurveTable(const TemperaturePoint *tbl) {

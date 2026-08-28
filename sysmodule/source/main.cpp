@@ -1,6 +1,6 @@
 #include "fan/fancontrol.hpp"
 
-#define INNER_HEAP_SIZE 0x1110
+#define INNER_HEAP_SIZE 0x1120
 
 #ifdef __cplusplus
 extern "C" {

@@ -55,6 +55,9 @@ tsl::elm::Element* MainMenu::createUI() {
     list->addItem(this->_fanSpeedLabel);
 
     list->addItem(new tsl::elm::CategoryHeader("Fan Curve", true));
+    list->addItem(new tsl::elm::CustomDrawer([this](tsl::gfx::Renderer* r, s32 x, s32 y, s32 w, s32 h) { DrawFanCurveGraph(r, x, y, w, h, this->_fanCurveTable, this->_liveTemp); }), FanGraphHeight);
+
+    list->addItem(new tsl::elm::CategoryHeader("Curve Points", true));
     for (int i = 0; i < TABLE_ENTRIES; i++) {
         this->_pLabels[i]->setClickListener([this, i](uint64_t keys) {
             if (keys & HidNpadButton_A) {
@@ -79,6 +82,7 @@ void MainMenu::update() {
     if (counter % 6 == 0) {
         // Get SOC temperature
         float socTemp = GetSOCTemperature();
+        this->_liveTemp = socTemp;
         if (socTemp >= 0) {
             this->_socTempLabel->setText("SOC Temp: " + std::to_string((int)socTemp) + "C");
         } else {

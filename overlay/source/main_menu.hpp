@@ -1,5 +1,6 @@
 #include <tesla.hpp>
 #include <fancontrol.hpp>
+#include "fan_graph.hpp"
 #include "utils.hpp"
 
 class MainMenu : public tsl::Gui {
@@ -12,6 +13,8 @@ private:
     // Real-time monitoring labels
     tsl::elm::ListItem* _socTempLabel;
     tsl::elm::ListItem* _fanSpeedLabel;
+
+    float _liveTemp = -1.0f;
 
     tsl::elm::ListItem* _pLabels[TABLE_ENTRIES];
 
