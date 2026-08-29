@@ -1,26 +1,20 @@
 #include <tesla.hpp>
 #include <fancontrol.hpp>
 #include "fan_graph.hpp"
+#include "curve.hpp"
 #include "utils.hpp"
 
 class MainMenu : public tsl::Gui {
 private:
-    TemperaturePoint _curve[MAX_TABLE_ENTRIES];
-    u32 _count;
     bool _enabled;
-    bool _tableIsChanged;
 
     tsl::elm::ToggleListItem* _enabledBtn;
 
-    // Real-time monitoring labels
     tsl::elm::ListItem* _socTempLabel;
     tsl::elm::ListItem* _fanSpeedLabel;
+    tsl::elm::ListItem* _curveBtn;
 
     float _liveTemp = -1.0f;
-
-    tsl::elm::ListItem* _pLabels[MAX_TABLE_ENTRIES];
-
-    std::string formatPointLabel(u32 i) const;
 
 public:
     MainMenu();

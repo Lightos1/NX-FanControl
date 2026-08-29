@@ -6,42 +6,42 @@
 
 namespace {
 
-constexpr s32 PanelInset = 7;
-constexpr s32 PanelBleed = 1;
-constexpr s32 PadTop     = 30;
-constexpr s32 PadBottom  = 26;
-constexpr s32 PadLeft    = 40;
-constexpr s32 PadRight   = 14;
-constexpr s32 MaxTicks   = 6;
-
-constexpr u32 TickFont   = 13;
-constexpr u32 HeaderFont = 15;
-
-constexpr tsl::Color ColorCold  (0x3, 0xA, 0xF, 0xF);
-constexpr tsl::Color ColorHot   (0xF, 0x4, 0x2, 0xF);
-constexpr tsl::Color ColorLive  (0x3, 0xF, 0x8, 0xF);
-constexpr tsl::Color ColorPlot  (0x0, 0x0, 0x0, 0x5);
-constexpr tsl::Color ColorGrid  (0x5, 0x5, 0x5, 0xA);
-constexpr tsl::Color ColorAxis  (0x8, 0x8, 0x8, 0xF);
-constexpr tsl::Color ColorTick  (0x9, 0x9, 0x9, 0xF);
-constexpr tsl::Color ColorPoint (0xF, 0xF, 0xF, 0xF);
-
-int FloorTo(int v, int step) {
-    return (int)std::floor((float)v / (float)step) * step;
-}
-
-int CeilTo(int v, int step) {
-    return (int)std::ceil((float)v / (float)step) * step;
-}
-
-tsl::Color CurveColor(float level, u8 alpha) {
-    const tsl::Color c = tsl::lerpColor(ColorHot, ColorCold, level);
-    return tsl::Color(c.r, c.g, c.b, alpha);
-}
-
-tsl::Color Fade(const tsl::Color& c, u8 alpha) {
-    return tsl::Color(c.r, c.g, c.b, alpha);
-}
+    constexpr s32 PanelInset = 7;
+    constexpr s32 PanelBleed = 1;
+    constexpr s32 PadTop     = 30;
+    constexpr s32 PadBottom  = 26;
+    constexpr s32 PadLeft    = 40;
+    constexpr s32 PadRight   = 14;
+    constexpr s32 MaxTicks   = 6;
+    
+    constexpr u32 TickFont   = 13;
+    constexpr u32 HeaderFont = 15;
+    
+    constexpr tsl::Color ColorCold  (0x3, 0xA, 0xF, 0xF);
+    constexpr tsl::Color ColorHot   (0xF, 0x4, 0x2, 0xF);
+    constexpr tsl::Color ColorLive  (0x3, 0xF, 0x8, 0xF);
+    constexpr tsl::Color ColorPlot  (0x0, 0x0, 0x0, 0x5);
+    constexpr tsl::Color ColorGrid  (0x5, 0x5, 0x5, 0xA);
+    constexpr tsl::Color ColorAxis  (0x8, 0x8, 0x8, 0xF);
+    constexpr tsl::Color ColorTick  (0x9, 0x9, 0x9, 0xF);
+    constexpr tsl::Color ColorPoint (0xF, 0xF, 0xF, 0xF);
+    
+    int FloorTo(int v, int step) {
+        return (int)std::floor((float)v / (float)step) * step;
+    }
+    
+    int CeilTo(int v, int step) {
+        return (int)std::ceil((float)v / (float)step) * step;
+    }
+    
+    tsl::Color CurveColor(float level, u8 alpha) {
+        const tsl::Color c = tsl::lerpColor(ColorHot, ColorCold, level);
+        return tsl::Color(c.r, c.g, c.b, alpha);
+    }
+    
+    tsl::Color Fade(const tsl::Color& c, u8 alpha) {
+        return tsl::Color(c.r, c.g, c.b, alpha);
+    }
 
 }
 

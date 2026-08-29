@@ -3,15 +3,18 @@
 #define TESLA_INIT_IMPL
 #include <tesla.hpp>
 #include "main_menu.hpp"
+#include "utils.hpp"
 
 class NxFanControlOverlay : public tsl::Overlay {
 public:
     virtual void initServices() override {
         fsdevMountSdmc();
         pmshellInitialize();
+        InitializeSensors();
     }
 
     virtual void exitServices() override {
+        CloseSensors();
         fsdevUnmountAll();
         pmshellExit();
     }
