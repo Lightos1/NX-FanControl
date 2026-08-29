@@ -5,7 +5,9 @@
 
 class MainMenu : public tsl::Gui {
 private:
-    TemperaturePoint* _fanCurveTable;
+    TemperaturePoint _curve[MAX_TABLE_ENTRIES];
+    u32 _count;
+    bool _enabled;
     bool _tableIsChanged;
 
     tsl::elm::ToggleListItem* _enabledBtn;
@@ -16,9 +18,9 @@ private:
 
     float _liveTemp = -1.0f;
 
-    tsl::elm::ListItem* _pLabels[TABLE_ENTRIES];
+    tsl::elm::ListItem* _pLabels[MAX_TABLE_ENTRIES];
 
-    std::string formatPointLabel(int i) const;
+    std::string formatPointLabel(u32 i) const;
 
 public:
     MainMenu();

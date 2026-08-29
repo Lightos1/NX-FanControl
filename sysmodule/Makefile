@@ -42,6 +42,7 @@ BUILD		:=	build
 SOURCES		:=	source source/soc source/fan ../common/source
 DATA		:=	data
 INCLUDES	:=	include ../common/include
+LIBNAMES	:=	minIni
 #ROMFS	:=	romfs
 
 #---------------------------------------------------------------------------------
@@ -60,13 +61,13 @@ CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions -fno-threadsafe-statics
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:= -lnx
+LIBS	:= $(foreach lib,$(LIBNAMES),-l$(lib)) -lnx
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:= $(PORTLIBS) $(LIBNX)
+LIBDIRS	:= $(PORTLIBS) $(LIBNX) $(foreach lib,$(LIBNAMES),$(TOPDIR)/../common/libs/$(lib))
 
 
 #---------------------------------------------------------------------------------

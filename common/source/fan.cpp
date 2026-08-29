@@ -1,29 +1,23 @@
 #include <fancontrol.hpp>
 #include <algorithm>
 
-const TemperaturePoint defaultTable[TABLE_ENTRIES] = {
-    { .temperature_c = 25,  .fanLevel_f = 0.00f },
-    { .temperature_c = 30,  .fanLevel_f = 0.00f },
-    { .temperature_c = 35,  .fanLevel_f = 0.00f },
-    { .temperature_c = 40,  .fanLevel_f = 0.00f },
-    { .temperature_c = 45,  .fanLevel_f = 0.00f },
-    { .temperature_c = 50,  .fanLevel_f = 0.30f },
-    { .temperature_c = 55,  .fanLevel_f = 0.40f },
-    { .temperature_c = 60,  .fanLevel_f = 0.60f },
-    { .temperature_c = 65,  .fanLevel_f = 0.70f },
-    { .temperature_c = 70,  .fanLevel_f = 1.00f },
-};
-
-void SortFanCurveTable(TemperaturePoint *tbl) {
-    std::sort(tbl, tbl + TABLE_ENTRIES, [](const TemperaturePoint &a, const TemperaturePoint &b) { return a.temperature_c < b.temperature_c; });
+void SortFanCurveTable(TemperaturePoint *tbl, u32 count) {
+    if (tbl == nullptr || count < 2) {
+        return;
+    }
+    std::sort(tbl, tbl + count, [](const TemperaturePoint &a, const TemperaturePoint &b) { return a.temperature_c < b.temperature_c; });
 }
 
-float InterpolateFanLevel(const TemperaturePoint *tbl, float tempC) {
-    if (tempC <= tbl[0].temperature_c) {
+float InterpolateFanLevel(const TemperaturePoint *tbl, u32 count, float tempC) {
+    if (tbl == nullptr || count == 0) {
+        return 0.0f;
+    }
+
+    if (count == 1 || tempC <= tbl[0].temperature_c) {
         return tbl[0].fanLevel_f;
     }
 
-    for (size_t i = 0; i < TABLE_ENTRIES - 1; i++) {
+    for (u32 i = 0; i < count - 1; i++) {
         if (tempC <= tbl[i + 1].temperature_c) {
             if (tbl[i].fanLevel_f == tbl[i + 1].fanLevel_f) {
                 return tbl[i].fanLevel_f;
@@ -39,5 +33,5 @@ float InterpolateFanLevel(const TemperaturePoint *tbl, float tempC) {
         }
     }
 
-    return tbl[TABLE_ENTRIES - 1].fanLevel_f;
+    return tbl[count - 1].fanLevel_f;
 }

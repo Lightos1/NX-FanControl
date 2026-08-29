@@ -67,18 +67,12 @@ void __appExit(void) {
 #endif
 
 int main(int argc, char* argv[]) {
-    TemperaturePoint *table;
+    Context ctx{};
 
     InitLog();
-    ReadConfigFile(&table);
-    SortFanCurveTable(table);
 
-    if (!ValidateFanCurveTable(table)) {
-        WriteLog("Invalid config!");
-        memcpy(table, defaultTable, sizeof(defaultTable));
-    }
+    InitContext(&ctx);
 
-    InitFanController(table);
     LoopFanController();
 
     __builtin_unreachable();

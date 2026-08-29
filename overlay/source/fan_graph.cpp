@@ -45,10 +45,17 @@ tsl::Color Fade(const tsl::Color& c, u8 alpha) {
 
 }
 
-void DrawFanCurveGraph(tsl::gfx::Renderer* renderer, s32 x, s32 y, s32 w, s32 h, const TemperaturePoint* table, float liveTempC) {
-    TemperaturePoint curve[TABLE_ENTRIES];
-    memcpy(curve, table, TABLE_SIZE);
-    SortFanCurveTable(curve);
+void DrawFanCurveGraph(tsl::gfx::Renderer* renderer, s32 x, s32 y, s32 w, s32 h, const TemperaturePoint* table, u32 count, float liveTempC) {
+    if (count == 0) {
+        return;
+    }
+    if (count > MAX_TABLE_ENTRIES) {
+        count = MAX_TABLE_ENTRIES;
+    }
+
+    TemperaturePoint curve[MAX_TABLE_ENTRIES];
+    memcpy(curve, table, sizeof(TemperaturePoint) * count);
+    SortFanCurveTable(curve, count);
 
     const s32 gx = x + PanelInset;
     const s32 gw = w + PanelBleed;
@@ -61,7 +68,7 @@ void DrawFanCurveGraph(tsl::gfx::Renderer* renderer, s32 x, s32 y, s32 w, s32 h,
     const bool haveLive = liveTempC >= 0.0f;
 
     int minT = curve[0].temperature_c;
-    int maxT = curve[TABLE_ENTRIES - 1].temperature_c;
+    int maxT = curve[count - 1].temperature_c;
     if (haveLive) {
         minT = std::min(minT, (int)std::floor(liveTempC));
         maxT = std::max(maxT, (int)std::ceil(liveTempC));
@@ -110,7 +117,7 @@ void DrawFanCurveGraph(tsl::gfx::Renderer* renderer, s32 x, s32 y, s32 w, s32 h,
     s32 prevY = -1;
     for (s32 i = 0; i < pw; i++) {
         const float temp = (float)domainMin + span * (float)i / (float)(pw - 1);
-        const float level = std::clamp(InterpolateFanLevel(curve, temp), 0.0f, 1.0f);
+        const float level = std::clamp(InterpolateFanLevel(curve, count, temp), 0.0f, 1.0f);
         const s32 curveY = yAt(level);
 
         if (curveY < baseY) {
@@ -124,7 +131,7 @@ void DrawFanCurveGraph(tsl::gfx::Renderer* renderer, s32 x, s32 y, s32 w, s32 h,
         prevY = curveY;
     }
 
-    for (int i = 0; i < TABLE_ENTRIES; i++) {
+    for (u32 i = 0; i < count; i++) {
         const float level = std::clamp(curve[i].fanLevel_f, 0.0f, 1.0f);
         const s32 pointX = xAt((float)curve[i].temperature_c);
         const s32 pointY = yAt(level);
@@ -135,7 +142,7 @@ void DrawFanCurveGraph(tsl::gfx::Renderer* renderer, s32 x, s32 y, s32 w, s32 h,
 
     float liveLevel = 0.0f;
     if (haveLive) {
-        liveLevel = std::clamp(InterpolateFanLevel(curve, liveTempC), 0.0f, 1.0f);
+        liveLevel = std::clamp(InterpolateFanLevel(curve, count, liveTempC), 0.0f, 1.0f);
 
         const s32 liveX = xAt(liveTempC);
         const s32 liveY = yAt(liveLevel);

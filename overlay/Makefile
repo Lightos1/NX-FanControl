@@ -46,6 +46,7 @@ BUILD		:=	build
 SOURCES		:=	source lib/libultrahand/libultra/source lib/libultrahand/libtesla/source lib/cJSON ../common/source
 DATA		:=	data
 INCLUDES	:=	include source lib/libultrahand/libultra/include lib/libultrahand/libtesla/include lib/cJSON ../common/include
+LIBNAMES	:=	minIni
 
 NO_ICON		:=  1
 
@@ -77,13 +78,13 @@ ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map) -Wl,--allow-multiple-definition
 
 # Fixed library linking - removed non-existent libraries and used correct library paths
-LIBS	:= -lnx -lstdc++ -lm
+LIBS	:= $(foreach lib,$(LIBNAMES),-l$(lib)) -lnx -lstdc++ -lm
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:= $(PORTLIBS) $(LIBNX)
+LIBDIRS	:= $(PORTLIBS) $(LIBNX) $(foreach lib,$(LIBNAMES),$(TOPDIR)/../common/libs/$(lib))
 
 
 #---------------------------------------------------------------------------------

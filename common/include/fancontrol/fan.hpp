@@ -7,10 +7,15 @@ struct TemperaturePoint {
     float fanLevel_f;
 };
 
-#define TABLE_ENTRIES  10
-#define TABLE_SIZE     (sizeof(TemperaturePoint) * TABLE_ENTRIES)
+struct Context {
+    bool enabled;
 
-extern const TemperaturePoint defaultTable[TABLE_ENTRIES];
+    TemperaturePoint *table;
+    u32 tableEntries;
+    size_t tableSize;
+};
 
-void SortFanCurveTable(TemperaturePoint *table);
-float InterpolateFanLevel(const TemperaturePoint *table, float temperature_c);
+#define MAX_TABLE_ENTRIES  32
+
+void SortFanCurveTable(TemperaturePoint *table, u32 count);
+float InterpolateFanLevel(const TemperaturePoint *table, u32 count, float temperature_c);

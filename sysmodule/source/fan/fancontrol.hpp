@@ -4,7 +4,7 @@
 #include <fancontrol.hpp>
 #include <switch.h>
 
-void InitFanController(TemperaturePoint *table);
+void InitContext(Context *_ctx);
 void LoopFanController();
-bool ValidateFanCurveTable(const TemperaturePoint *table);
+bool ValidateFanCurveTable(const TemperaturePoint *table, u32 count);
 void CleanupFanController();

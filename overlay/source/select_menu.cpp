@@ -2,10 +2,11 @@
 #include "select_menu.hpp"
 #include "utils.hpp"
 
-SelectMenu::SelectMenu(int i, TemperaturePoint* fanCurveTable, bool* tableIsChanged)
+SelectMenu::SelectMenu(u32 i, TemperaturePoint* fanCurveTable, u32 count, bool* tableIsChanged)
 {
     this->_i = i;
     this->_fanCurveTable = fanCurveTable;
+    this->_count = count;
     this->_tableIsChanged = tableIsChanged;
 
     this->_saveBtn = new tsl::elm::ListItem("Save");
@@ -45,9 +46,12 @@ tsl::elm::Element* SelectMenu::createUI(){
     {
 	    if (keys & HidNpadButton_A)
         {
-		    WriteConfigFile(this->_fanCurveTable);
+		    if (SaveCurve(CurveSection, this->_fanCurveTable, this->_count)) {
+                this->_saveBtn->setText("Saved!");
+            } else {
+                this->_saveBtn->setText("Save failed!");
+            }
 
-            this->_saveBtn->setText("Saved!");
             *this->_tableIsChanged = true;
 		    return true;
 		}

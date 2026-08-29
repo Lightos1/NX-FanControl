@@ -1,10 +1,12 @@
 #include <tesla.hpp>
+#include <fancontrol.hpp>
 #include "utils.hpp"
 
 class SelectMenu : public tsl::Gui {
 private:
-    int _i = 0;
+    u32 _i = 0;
     TemperaturePoint* _fanCurveTable;
+    u32 _count;
     bool* _tableIsChanged;
 
     tsl::elm::CategoryHeader* _tempLabel;
@@ -12,7 +14,7 @@ private:
     tsl::elm::ListItem* _saveBtn;
 
 public:
-    SelectMenu(int i, TemperaturePoint *tps, bool* tableIsChanged);
+    SelectMenu(u32 i, TemperaturePoint *tps, u32 count, bool* tableIsChanged);
 
     virtual tsl::elm::Element* createUI() override;
 };
