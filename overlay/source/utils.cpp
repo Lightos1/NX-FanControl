@@ -1,4 +1,5 @@
 #include <fancontrol.hpp>
+#include <apm_ext.h>
 #include "utils.hpp"
 #include "pwm.h"
 
@@ -86,6 +87,14 @@ float GetFanSpeed() {
     }
 
     return -1.0f;
+}
+
+bool IsConsoleDocked() {
+    u32 mode = 0;
+    if (R_FAILED(apmExtGetPerformanceMode(&mode))) {
+        return false;
+    }
+    return mode != 0;
 }
 
 void CloseSensors() {

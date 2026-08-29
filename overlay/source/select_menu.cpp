@@ -63,13 +63,13 @@ namespace {
 
 SelectMenu::SelectMenu(u32 i) {
     this->_i = i;
-    this->_tempLabel = new tsl::elm::CategoryHeader(std::to_string(g_curve.points[i].temperature_c) + "C", true);
-    this->_fanLabel = new tsl::elm::CategoryHeader(std::to_string((int)(g_curve.points[i].fanLevel_f * 100)) + "%", true);
+    this->_tempLabel = new tsl::elm::CategoryHeader(std::to_string(g_editCurve->points[i].temperature_c) + "C", true);
+    this->_fanLabel = new tsl::elm::CategoryHeader(std::to_string((int)(g_editCurve->points[i].fanLevel_f * 100)) + "%", true);
 }
 
 void SelectMenu::exitPoint() {
-    std::string label = FormatPointLabel(g_curve.points[this->_i]);
-    g_curve.persist();
+    std::string label = FormatPointLabel(g_editCurve->points[this->_i]);
+    g_editCurve->persist();
     g_navJump = label;
     triggerExitFeedback();
     tsl::swapTo<CurveMenu>(SwapDepth(2));
@@ -80,11 +80,11 @@ tsl::elm::Element* SelectMenu::createUI() {
 
     auto list = new tsl::elm::List();
 
-    const int curTemp = g_curve.points[this->_i].temperature_c;
+    const int curTemp = g_editCurve->points[this->_i].temperature_c;
 
     std::vector<int> freeTemps;
     for (int t = MinTemp; t <= MaxTemp; t += 5) {
-        if (!g_curve.tempTaken(t, this->_i)) {
+        if (!g_editCurve->tempTaken(t, this->_i)) {
             freeTemps.push_back(t);
         }
     }
@@ -104,7 +104,7 @@ tsl::elm::Element* SelectMenu::createUI() {
                 return;
             }
             int newTemp = freeTemps[value];
-            if (g_curve.trySetTemp(this->_i, newTemp)) {
+            if (g_editCurve->trySetTemp(this->_i, newTemp)) {
                 this->_tempLabel->setText(std::to_string(newTemp) + "C");
             }
         });
@@ -116,14 +116,14 @@ tsl::elm::Element* SelectMenu::createUI() {
     auto stepFanL = new tsl::elm::StepTrackBar("%", 21);
     stepFanL->setValueChangedListener([this](u16 value) {
         this->_fanLabel->setText(std::to_string(value * 5) + "%");
-        g_curve.setLevel(this->_i, (float)(value * 5) / 100.0f);
+        g_editCurve->setLevel(this->_i, (float)(value * 5) / 100.0f);
     });
-    stepFanL->setProgress(((int)(g_curve.points[this->_i].fanLevel_f * 100)) / 5);
+    stepFanL->setProgress(((int)(g_editCurve->points[this->_i].fanLevel_f * 100)) / 5);
     list->addItem(stepFanL);
 
-    list->addItem(new HoldToDeleteItem(g_curve.count > 2, [this]() {
-        std::string neighbour = FormatPointLabel(g_curve.points[this->_i == 0 ? 1 : this->_i - 1]);
-        if (g_curve.removePoint(this->_i)) {
+    list->addItem(new HoldToDeleteItem(g_editCurve->count > 2, [this]() {
+        std::string neighbour = FormatPointLabel(g_editCurve->points[this->_i == 0 ? 1 : this->_i - 1]);
+        if (g_editCurve->removePoint(this->_i)) {
             g_navJump = neighbour;
             triggerExitFeedback();
             tsl::swapTo<CurveMenu>(SwapDepth(2));

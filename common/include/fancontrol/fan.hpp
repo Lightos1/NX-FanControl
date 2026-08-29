@@ -9,10 +9,12 @@ struct TemperaturePoint {
 
 struct Context {
     bool enabled;
+    bool dockedOverride;
+
+    bool isDocked;
 
     TemperaturePoint *table;
     u32 tableEntries;
-    size_t tableSize;
 };
 
 #define MAX_TABLE_ENTRIES  32

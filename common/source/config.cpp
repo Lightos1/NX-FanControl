@@ -3,6 +3,7 @@
 
 #define KEY_COUNT   "pointCount"
 #define KEY_ENABLED "enabled"
+#define KEY_DOCKED_OVERRIDE "docked_override"
 
 static int ClampSpeed(int speed) {
     if (speed < 0) {
@@ -54,6 +55,10 @@ u32 GetPointCount(const char *section) {
 
 bool IsEnabled(const char *section) {
     return ini_getbool(section, KEY_ENABLED, 0, FC_CONFIG_INI);
+}
+
+bool IsDockedOverride(const char *section) {
+    return ini_getbool(section, KEY_DOCKED_OVERRIDE, 0, FC_CONFIG_INI);
 }
 
 static bool BeginConfigWrite(void) {
@@ -150,6 +155,20 @@ bool SetEnabled(const char *section, bool enabled) {
     if (!ini_putl(section, KEY_ENABLED, enabled ? 1 : 0, FC_CONFIG_INI_TMP)) {
         remove(FC_CONFIG_INI_TMP);
         WriteLog("SetEnabled: ini_putl failed");
+        return false;
+    }
+
+    return CommitConfigWrite();
+}
+
+bool SetDockedOverride(const char *section, bool enabled) {
+    if (!BeginConfigWrite()) {
+        return false;
+    }
+
+    if (!ini_putl(section, KEY_DOCKED_OVERRIDE, enabled ? 1 : 0, FC_CONFIG_INI_TMP)) {
+        remove(FC_CONFIG_INI_TMP);
+        WriteLog("SetDockedOverride: ini_putl failed");
         return false;
     }
 

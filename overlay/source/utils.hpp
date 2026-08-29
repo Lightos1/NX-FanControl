@@ -16,3 +16,5 @@ bool InitializeSensors();
 float GetSOCTemperature();
 float GetFanSpeed();
 void CloseSensors();
+
+bool IsConsoleDocked();

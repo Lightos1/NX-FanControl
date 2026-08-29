@@ -1,6 +1,7 @@
 #include <fancontrol.hpp>
 #include "fancontrol.hpp"
 #include "fan_hysteresis.hpp"
+#include <apm_ext.h>
 #include <atomic>
 #include <math.h>
 #include <sys/stat.h>
@@ -12,6 +13,7 @@ Context *ctx;
 #define TEMP_FAST_THRESH        55.0f
 #define CONFIG_CHECK_INTERVAL_NS 2000000000ULL
 #define DISABLED_SLEEP_NS 2000000000ULL
+#define DOCK_REFRESH_INTERVAL_NS 1000000000ULL
 #define TEMP_READ_RETRIES         3
 
 bool ValidateFanCurveTable(const TemperaturePoint *tbl, u32 count) {
@@ -20,6 +22,15 @@ bool ValidateFanCurveTable(const TemperaturePoint *tbl, u32 count) {
             return false;
         }
     }
+    return true;
+}
+
+static bool IntervalElapsed(u64 *last, u64 intervalNs) {
+    u64 now = armGetSystemTick();
+    if (armTicksToNs(now - *last) < intervalNs) {
+        return false;
+    }
+    *last = now;
     return true;
 }
 
@@ -51,24 +62,58 @@ static bool LoadCurveAlloc(const char *curveSection, TemperaturePoint **outTable
     return true;
 }
 
+static const char *GetProfileCurve() {
+    if (ctx->isDocked) {
+        return DockedOverrideCurveSection;
+    }
+
+    return CurveSection;
+}
+
+static bool SwapCurveTable(const char *curveSection, FanHysteresisState *fanState) {
+    TemperaturePoint *newTable = nullptr;
+    u32 newCount = 0;
+    if (!LoadCurveAlloc(curveSection, &newTable, &newCount)) {
+        return false;
+    }
+
+    TemperaturePoint *oldTable = ctx->table;
+    ctx->table        = newTable;
+    ctx->tableEntries = newCount;
+    free(oldTable);
+    RebindFanHysteresisTable(fanState, ctx->table, ctx->tableEntries);
+    return true;
+}
+
+static bool IsDocked() {
+    u32 docked = 0;
+    Result rc  = apmExtGetPerformanceMode(&docked);
+    if (R_FAILED(rc)) {
+        WriteLog("error: apmExtGetPerformanceMode");
+        diagAbortWithResult(rc);
+    }
+
+    return docked;
+}
+
 void InitContext(Context *_ctx) {
     ctx = _ctx;
 
-    ctx->table        = nullptr;
-    ctx->tableEntries = 0;
-    ctx->tableSize    = 0;
-    ctx->enabled      = false;
+    ctx->table          = nullptr;
+    ctx->tableEntries   = 0;
+    ctx->enabled        = false;
+    ctx->dockedOverride = IsDockedOverride(ConfigSection);
+    ctx->isDocked       = ctx->dockedOverride && IsDocked();
 
     TemperaturePoint *table = nullptr;
     u32 count = 0;
-    if (!LoadCurveAlloc(CurveSection, &table, &count)) {
+    if (!LoadCurveAlloc(GetProfileCurve(), &table, &count)) {
         WriteLog("No valid curve at init, starting disabled");
         return;
     }
 
     ctx->table        = table;
     ctx->tableEntries = count;
-    ctx->tableSize    = sizeof(TemperaturePoint) * count;
     ctx->enabled      = IsEnabled(ConfigSection);
 }
 
@@ -88,7 +133,7 @@ static time_t GetConfigMTime(const char *path) {
     return GetConfigStat(path, &mtime, &size) ? mtime : 0;
 }
 
-static bool TryReloadConfig(const char *configSection, const char *curveSection, time_t &lastMTime) {
+static bool TryReloadConfig(const char *configSection, FanHysteresisState *fanState, time_t &lastMTime) {
     time_t mtime = 0;
     off_t  size  = 0;
     if (!GetConfigStat(FC_CONFIG_INI, &mtime, &size) || mtime == 0 || mtime == lastMTime) {
@@ -98,11 +143,11 @@ static bool TryReloadConfig(const char *configSection, const char *curveSection,
 
     lastMTime = mtime;
 
-    ctx->enabled = IsEnabled(configSection);
+    ctx->enabled        = IsEnabled(configSection);
+    ctx->dockedOverride = IsDockedOverride(configSection);
+    ctx->isDocked       = ctx->dockedOverride && IsDocked();
 
-    TemperaturePoint *newTable = nullptr;
-    u32 newCount = 0;
-    if (!LoadCurveAlloc(curveSection, &newTable, &newCount)) {
+    if (!SwapCurveTable(GetProfileCurve(), fanState)) {
         static time_t lastBadMTime = 0;
         if (mtime != lastBadMTime) {
             WriteLog("Config reload failed, keeping current curve");
@@ -111,26 +156,45 @@ static bool TryReloadConfig(const char *configSection, const char *curveSection,
         return false;
     }
 
-    TemperaturePoint *oldTable = ctx->table;
-    ctx->table        = newTable;
-    ctx->tableEntries = newCount;
-    ctx->tableSize    = sizeof(TemperaturePoint) * newCount;
-    free(oldTable);
-
     return true;
 }
 
-static void RefreshConfig(const char *configSection, const char *curveSection, FanHysteresisState *fanState) {
+static void RefreshConfig(const char *configSection, FanHysteresisState *fanState) {
     static time_t lastCfgMTime  = GetConfigMTime(FC_CONFIG_INI);
     static u64    lastCheckTime = armGetSystemTick();
 
-    u64 now = armGetSystemTick();
-    if (armTicksToNs(now - lastCheckTime) >= CONFIG_CHECK_INTERVAL_NS) {
-        lastCheckTime = now;
-        if (TryReloadConfig(configSection, curveSection, lastCfgMTime)) {
-            RebindFanHysteresisTable(fanState, ctx->table, ctx->tableEntries);
+    if (IntervalElapsed(&lastCheckTime, CONFIG_CHECK_INTERVAL_NS)) {
+        if (TryReloadConfig(configSection, fanState, lastCfgMTime)) {
             WriteLog("Config reloaded");
         }
+    }
+}
+
+static bool HasDockChanged(bool newState) {
+    if (newState != ctx->isDocked) {
+        return true;
+    }
+
+    return false;
+}
+
+static void HandleDockRefresh(FanHysteresisState *fanState) {
+    bool docked = IsDocked();
+    if (HasDockChanged(docked)) {
+        ctx->isDocked = docked;
+        SwapCurveTable(GetProfileCurve(), fanState);
+    }
+}
+
+static void RefreshDockedState(FanHysteresisState *fanState) {
+    if (!ctx->dockedOverride) {
+        return;
+    }
+
+    static u64 lastCheckTime = armGetSystemTick();
+
+    if (IntervalElapsed(&lastCheckTime, DOCK_REFRESH_INTERVAL_NS)) {
+        HandleDockRefresh(fanState);
     }
 }
 
@@ -148,7 +212,8 @@ void LoopFanController() {
     InitFanHysteresis(&fanState, ctx->table, ctx->tableEntries, 2.0f);
 
     for (;;) {
-        RefreshConfig(ConfigSection, CurveSection, &fanState);
+        RefreshConfig(ConfigSection, &fanState);
+        RefreshDockedState(&fanState);
 
         if (!ctx->enabled || ctx->table == nullptr) {
             svcSleepThread(DISABLED_SLEEP_NS);

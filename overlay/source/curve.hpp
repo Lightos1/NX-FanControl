@@ -7,6 +7,12 @@ class CurveStore {
 public:
     TemperaturePoint points[MAX_TABLE_ENTRIES];
     u32 count = 0;
+    const char* section = CurveSection;
+
+    CurveStore() = default;
+    explicit CurveStore(const char* section) : section(section) {}
+
+    bool isDockedProfile() const;
 
     void loadOrDefault();
     bool persist();
@@ -22,6 +28,11 @@ public:
 };
 
 extern CurveStore g_curve;
+extern CurveStore g_dockedCurve;
+extern CurveStore* g_editCurve;
 extern std::string g_navJump;
 
 std::string FormatPointLabel(const TemperaturePoint& point);
+
+std::string HandheldCurveButtonLabel();
+constexpr const char* DockedCurveButtonLabel = "Edit Docked Curve";

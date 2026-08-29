@@ -3,6 +3,8 @@
 #include <algorithm>
 
 CurveStore g_curve;
+CurveStore g_dockedCurve(DockedOverrideCurveSection);
+CurveStore* g_editCurve = &g_curve;
 std::string g_navJump;
 
 constexpr int MinTemp = 20;
@@ -27,13 +29,23 @@ std::string FormatPointLabel(const TemperaturePoint& point) {
     return std::to_string(point.temperature_c) + "C  |  " + std::to_string((int)(point.fanLevel_f * 100)) + "%";
 }
 
+std::string HandheldCurveButtonLabel() {
+    return IsDockedOverride(ConfigSection) ? "Edit Handheld Curve" : "Edit Fan Curve";
+}
+
+bool CurveStore::isDockedProfile() const {
+    return strcmp(this->section, DockedOverrideCurveSection) == 0;
+}
+
 void CurveStore::loadOrDefault() {
-    this->count = LoadCurve(CurveSection, this->points, MAX_TABLE_ENTRIES);
+    this->count = LoadCurve(this->section, this->points, MAX_TABLE_ENTRIES);
     if (this->count == 0) {
         memcpy(this->points, DefaultCurve, sizeof(DefaultCurve));
         this->count = DefaultCurveCount;
-        SaveCurve(CurveSection, this->points, this->count);
-        SetEnabled(ConfigSection, true);
+        SaveCurve(this->section, this->points, this->count);
+        if (!this->isDockedProfile()) {
+            SetEnabled(ConfigSection, true);
+        }
     }
     this->sortByTemp();
 }
@@ -44,7 +56,7 @@ void CurveStore::sortByTemp() {
 
 bool CurveStore::persist() {
     this->sortByTemp();
-    return SaveCurve(CurveSection, this->points, this->count);
+    return SaveCurve(this->section, this->points, this->count);
 }
 
 bool CurveStore::tempTaken(int temperature_c, u32 exceptIndex) const {

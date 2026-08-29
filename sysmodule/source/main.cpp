@@ -1,4 +1,5 @@
 #include "fan/fancontrol.hpp"
+#include <apm_ext.h>
 
 #define INNER_HEAP_SIZE 0x1400
 
@@ -51,6 +52,10 @@ void __appInit(void) {
     if (R_FAILED(rc))
         diagAbortWithResult(MAKERESULT(Module_Libnx, LibnxError_ShouldNotHappen));
 
+    rc = apmExtInitialize();
+    if (R_FAILED(rc))
+        diagAbortWithResult(rc);
+
     smExit();
 }
 
@@ -60,6 +65,7 @@ void __appExit(void) {
     i2cExit();
     fsExit();
     fsdevUnmountAll();
+    apmExtExit();
 }
 
 #ifdef __cplusplus
