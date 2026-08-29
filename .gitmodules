@@ -4,3 +4,6 @@
 [submodule "overlay/lib/cJSON"]
 	path = overlay/lib/cJSON
 	url = https://github.com/DaveGamble/cJSON.git
+[submodule "sysmodule/lib/minIni"]
+	path = sysmodule/lib/minIni
+	url = https://github.com/compuphase/minIni.git
