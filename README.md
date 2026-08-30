@@ -6,16 +6,16 @@
 
 ## Features
 
-* **Custom fan curve**: Define a dynamic amount of temperature points with corresponding fan speeds.
-* **Real-time monitoring**: View the current SoC temperature and fan speed in real time on a graph.
-* **Profiles**: Use a secondary fan curve in docked mode (Opt in).
-* **Configuration**: Configure refresh intervals:
-    - **Docked refresh interval**: The interval used for checking docked state
-    - **Enable refresh interval**: Responsible for checking whever custom fan control is enabled
-    - **Config refresh interval**: How fast the config gets refreshed
-    - **High temperature refresh interval**: Faster refresh interval at higher temperatures
-    - **Low temperature frefresh interval**: Opposite of high temperature refresh
-* **High refresh temperature**: the temperature where high temp refresh starts
+* **Custom fan curve**: Set your own temperature-to-fan-speed points, with as many points as you need for more precise control.
+* **Real-time monitoring**: Watch SoC temperature and fan speed live on a graph.
+* **Profiles**: Optionally use a separate fan curve automatically when docked.
+* **Refresh interval settings**: Control how often different parts of the sysmodule update:
+    - **Docked check interval**: How often the sysmodule checks whether the device is docked.
+    - **Custom control check interval**: How often the sysmodule checks whether custom fan control is turned on.
+    - **Config reload interval**: How often the sysmodule re-reads your configuration.
+    - **High-temperature refresh interval**: A faster update rate used once temperatures get high, for quicker response.
+    - **Low-temperature refresh interval**: A slower update rate used when temperatures are low, to save resources.
+* **High-temperature threshold**: The temperature at which the sysmodule switches to the faster (high-temperature) refresh interval.
 
 ---
 
