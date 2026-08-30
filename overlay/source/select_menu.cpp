@@ -10,6 +10,7 @@
 namespace {
 
     constexpr tsl::Color DeleteFill(0xF, 0x3, 0x3, 0xF);
+    constexpr tsl::Color AButtonColor(0x3, 0xA, 0xF, 0xF);
     constexpr u64 HoldDurationNs = 500000000ULL;
     constexpr int MinTemp = 20;
     constexpr int MaxTemp = 80;
@@ -17,8 +18,28 @@ namespace {
     class HoldToDeleteItem : public tsl::elm::ListItem {
     public:
         HoldToDeleteItem(bool enabled, std::function<void()> onFilled)
-            : tsl::elm::ListItem("Delete Point", enabled ? "hold A" : "can't delete (min. points)"), _enabled(enabled), _onFilled(onFilled) {
+            : tsl::elm::ListItem("Delete Point", enabled ? "" : "can't delete (min. points)"), _enabled(enabled), _onFilled(onFilled) {
             this->m_flags.m_useClickAnimation = false;
+        }
+
+        virtual void drawValue(tsl::gfx::Renderer* renderer, s32 yOffset, bool useClickTextColor) override {
+            if (!this->_enabled) {
+                tsl::elm::ListItem::drawValue(renderer, yOffset, useClickTextColor);
+                return;
+            }
+            const s32 x = this->getX() + this->m_maxWidth + 47;
+            const s32 y = renderer->getVerticalCenterBaseline(this->getY(), this->m_listItemHeight, 20);
+            const tsl::Color base = [&] {
+                if (useClickTextColor) {
+                    return tsl::clickTextColor;
+                }
+                if (this->m_focused && ult::useSelectionValue) {
+                    return tsl::selectedValueTextColor;
+                }
+                return tsl::onTextColor;
+            }();
+            static const std::vector<std::string> special = {""};
+            renderer->drawStringWithColoredSections(this->m_value, false, special, x, y, 20, base, AButtonColor);
         }
 
         virtual void draw(tsl::gfx::Renderer* renderer) override {
@@ -141,4 +162,3 @@ bool SelectMenu::handleInput(u64 keysDown, u64 keysHeld, const HidTouchState& to
         return true;
     }
     return false;
-}
