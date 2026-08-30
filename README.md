@@ -26,7 +26,7 @@ Before building, ensure you have the [**devkitPro toolchain**](https://devkitpro
 Clone the repository (including submodules) and build:
 
 ```bash
-git clone https://github.com/dominatorul/NX-FanControl.git --recurse-submodules
+git clone https://github.com/Lightos1/NX-FanControl.git --recurse-submodules
 cd NX-FanControl
 ./build.sh
 ```
