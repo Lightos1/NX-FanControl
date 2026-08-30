@@ -4,23 +4,21 @@ ROOT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 DIST_DIR="$ROOT_DIR/dist"
 CORES="$(nproc --all)"
 echo "CORES: $CORES"
-echo
 
-echo "*** building sysmodule ***"
 echo
+echo "*** building sysmodule ***"
 cd sysmodule
 make -j$CORES
 cd "$ROOT_DIR"
 
-echo "*** building overlay ***"
 echo
+echo "*** building overlay ***"
 cd overlay
 make -j$CORES
 cd "$ROOT_DIR"
 
 echo
 echo "*** bundling dist ***"
-echo
 
 TITLE_ID="$(grep -oP '"title_id":\s*"0x\K(\w+)' "$ROOT_DIR/sysmodule/sysmodule.json")"
 echo "TITLE_ID: $TITLE_ID"
@@ -37,7 +35,6 @@ cp -vf "$ROOT_DIR/overlay/NX-FanControl.ovl" "$DIST_DIR/switch/.overlays/NX-FanC
 
 echo
 echo "*** packaging NX-FanControl.zip ***"
-echo
 
 cd "$DIST_DIR"
 rm -f NX-FanControl.zip

@@ -1,9 +1,11 @@
 #include <fancontrol.hpp>
 #include <minIni.h>
+#include <algorithm>
 
-#define KEY_COUNT   "pointCount"
-#define KEY_ENABLED "enabled"
-#define KEY_DOCKED_OVERRIDE "docked_override"
+constexpr const char *KeyCount           = "pointCount";
+constexpr const char *KeyEnabled         = "enabled";
+constexpr const char *KeyDockedOverride  = "docked_override";
+constexpr const char *KeyFastRefreshTemp = "high_refresh_temp_c";
 
 static int ClampSpeed(int speed) {
     if (speed < 0) {
@@ -43,7 +45,7 @@ u32 LoadCurve(const char *section, TemperaturePoint *points, u32 maxPoints) {
 }
 
 u32 GetPointCount(const char *section) {
-    long n = ini_getl(section, KEY_COUNT, 0, FC_CONFIG_INI);
+    long n = ini_getl(section, KeyCount, 0, FC_CONFIG_INI);
     if (n < 0) {
         return 0;
     }
@@ -54,11 +56,11 @@ u32 GetPointCount(const char *section) {
 }
 
 bool IsEnabled(const char *section) {
-    return ini_getbool(section, KEY_ENABLED, 0, FC_CONFIG_INI);
+    return ini_getbool(section, KeyEnabled, 0, FC_CONFIG_INI);
 }
 
 bool IsDockedOverride(const char *section) {
-    return ini_getbool(section, KEY_DOCKED_OVERRIDE, 0, FC_CONFIG_INI);
+    return ini_getbool(section, KeyDockedOverride, 0, FC_CONFIG_INI);
 }
 
 static bool BeginConfigWrite(void) {
@@ -110,6 +112,20 @@ static bool CommitConfigWrite(void) {
     return true;
 }
 
+static bool WriteConfigLong(const char *section, const char *key, long value, const char *failure) {
+    if (!BeginConfigWrite()) {
+        return false;
+    }
+
+    if (!ini_putl(section, key, value, FC_CONFIG_INI_TMP)) {
+        remove(FC_CONFIG_INI_TMP);
+        WriteLog(failure);
+        return false;
+    }
+
+    return CommitConfigWrite();
+}
+
 bool SaveCurve(const char *section, const TemperaturePoint *points, u32 count) {
     if (points == NULL || count == 0 || count > MAX_TABLE_ENTRIES) {
         return false;
@@ -138,7 +154,7 @@ bool SaveCurve(const char *section, const TemperaturePoint *points, u32 count) {
         ini_puts(section, key, NULL, FC_CONFIG_INI_TMP);
     }
 
-    if (!ini_putl(section, KEY_COUNT, count, FC_CONFIG_INI_TMP)) {
+    if (!ini_putl(section, KeyCount, count, FC_CONFIG_INI_TMP)) {
         remove(FC_CONFIG_INI_TMP);
         WriteLog("SaveCurve: ini_putl failed");
         return false;
@@ -148,29 +164,25 @@ bool SaveCurve(const char *section, const TemperaturePoint *points, u32 count) {
 }
 
 bool SetEnabled(const char *section, bool enabled) {
-    if (!BeginConfigWrite()) {
-        return false;
-    }
-
-    if (!ini_putl(section, KEY_ENABLED, enabled ? 1 : 0, FC_CONFIG_INI_TMP)) {
-        remove(FC_CONFIG_INI_TMP);
-        WriteLog("SetEnabled: ini_putl failed");
-        return false;
-    }
-
-    return CommitConfigWrite();
+    return WriteConfigLong(section, KeyEnabled, enabled ? 1 : 0, "SetEnabled: ini_putl failed");
 }
 
 bool SetDockedOverride(const char *section, bool enabled) {
-    if (!BeginConfigWrite()) {
-        return false;
-    }
+    return WriteConfigLong(section, KeyDockedOverride, enabled ? 1 : 0, "SetDockedOverride: ini_putl failed");
+}
 
-    if (!ini_putl(section, KEY_DOCKED_OVERRIDE, enabled ? 1 : 0, FC_CONFIG_INI_TMP)) {
-        remove(FC_CONFIG_INI_TMP);
-        WriteLog("SetDockedOverride: ini_putl failed");
-        return false;
-    }
+u32 GetFastRefreshTemperatureC(const char *section) {
+    return static_cast<u32>(std::max(ini_getl(section, KeyFastRefreshTemp, DefaultFastRefreshTempC, FC_CONFIG_INI), 0L));
+}
 
-    return CommitConfigWrite();
+bool SetFastRefreshTemperatureC(const char *section, u32 temp) {
+    return WriteConfigLong(section, KeyFastRefreshTemp, static_cast<long>(temp), "SetFastRefreshTemperatureC: ini_putl failed");
+}
+
+u32 GetRefreshInterval(const char *section, const char *key, u32 defaultMs) {
+    return static_cast<u32>(std::max(ini_getl(section, key, defaultMs, FC_CONFIG_INI), 0L));
+}
+
+bool SetRefreshInterval(const char *section, const char *key, u32 ms) {
+    return WriteConfigLong(section, key, static_cast<long>(ms), "SetRefreshInterval: ini_putl failed");
 }

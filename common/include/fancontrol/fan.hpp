@@ -13,6 +13,15 @@ struct Context {
 
     bool isDocked;
 
+    struct {
+        u32 fastRefreshTemperatureC;
+        u32 slowRefreshIntervalMs;
+        u32 fastRefreshIntervalMs;
+        u32 configRefreshIntervalMs;
+        u32 enableRefreshIntervalMs;
+        u32 dockedRefreshIntervalMs;
+    } refreshConfig;
+
     TemperaturePoint *table;
     u32 tableEntries;
 };

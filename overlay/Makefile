@@ -43,9 +43,9 @@ APP_VERSION :=	1.1.0
 TARGET		:=	$(APP_TITLE)
 BUILD		:=	build
 # Include libultrahand source directories
-SOURCES		:=	source lib/libultrahand/libultra/source lib/libultrahand/libtesla/source lib/cJSON ../common/source
+SOURCES		:=	source lib/libultrahand/common lib/libultrahand/libultra/source lib/libultrahand/libtesla/source ../common/source
 DATA		:=	data
-INCLUDES	:=	include source lib/libultrahand/libultra/include lib/libultrahand/libtesla/include lib/cJSON ../common/include
+INCLUDES	:=	include source lib/libultrahand/common lib/libultrahand/libultra/include lib/libultrahand/libtesla/include ../common/include
 LIBNAMES	:=	minIni
 
 NO_ICON		:=  1
@@ -103,7 +103,7 @@ export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
 # Exclude test files from compilation
-CFILES		:=	$(foreach dir,$(SOURCES),$(filter-out test.c cJSON_Utils.c,$(notdir $(wildcard $(dir)/*.c))))
+CFILES		:=	$(foreach dir,$(SOURCES),$(filter-out test.c,$(notdir $(wildcard $(dir)/*.c))))
 CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
 SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
 BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))

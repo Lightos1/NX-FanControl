@@ -8,7 +8,7 @@ MainMenu::MainMenu() {
     g_curve.loadOrDefault();
     if (this->_dockedOverride) {
         g_dockedCurve.loadOrDefault();
-        this->_isDocked = IsConsoleDocked();
+        this->_isDocked = IsDocked();
     }
 
     this->_enabled = IsEnabled(ConfigSection);
@@ -103,7 +103,7 @@ void MainMenu::update() {
     counter++;
 
     if (counter % 6 == 0) {
-        this->_isDocked = IsConsoleDocked();
+        this->_isDocked = IsDocked();
         this->_modeLabel->setText(std::string("State: ") + (this->_isDocked ? "Docked" : "Handheld"));
 
         float socTemp = GetSOCTemperature();

@@ -7,6 +7,7 @@
 #include <sys/stat.h>
 
 #include "fancontrol/fan.hpp"
+#include "fancontrol/apm.hpp"
 #include "fancontrol/log.hpp"
 #include "fancontrol/config.hpp"
 #include "fancontrol/i2c.hpp"

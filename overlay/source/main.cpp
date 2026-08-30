@@ -2,7 +2,6 @@
 // Define TESLA_INIT_IMPL before including tesla.hpp to get the implementations
 #define TESLA_INIT_IMPL
 #include <tesla.hpp>
-#include <apm_ext.h>
 #include "main_menu.hpp"
 #include "utils.hpp"
 
@@ -11,13 +10,13 @@ public:
     virtual void initServices() override {
         fsdevMountSdmc();
         pmshellInitialize();
-        apmExtInitialize();
+        apmInitialize();
         InitializeSensors();
     }
 
     virtual void exitServices() override {
         CloseSensors();
-        apmExtExit();
+        apmExit();
         fsdevUnmountAll();
         pmshellExit();
     }
