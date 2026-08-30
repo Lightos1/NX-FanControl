@@ -162,3 +162,4 @@ bool SelectMenu::handleInput(u64 keysDown, u64 keysHeld, const HidTouchState& to
         return true;
     }
     return false;
+}
