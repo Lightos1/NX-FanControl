@@ -46,10 +46,10 @@ atmosphere/config/
 
 ---
 
-## Credit
-**Zathawo** - Upstream
-**Dominaturul** - Original fork
-**CtCaer** - Temperature driver
+## Credits
+* **Zathawo** - Upstream
+* **Dominatorul** - Original fork
+* **CtCaer** - Temperature driver
 
 ## License
 
