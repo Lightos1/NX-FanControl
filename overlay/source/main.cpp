@@ -10,13 +10,11 @@ public:
     virtual void initServices() override {
         fsdevMountSdmc();
         pmshellInitialize();
-        apmInitialize();
         InitializeSensors();
     }
 
     virtual void exitServices() override {
         CloseSensors();
-        apmExit();
         fsdevUnmountAll();
         pmshellExit();
     }

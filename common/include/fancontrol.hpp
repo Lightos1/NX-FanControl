@@ -12,3 +12,4 @@
 #include "fancontrol/config.hpp"
 #include "fancontrol/i2c.hpp"
 #include "fancontrol/tmp451.hpp"
+#include "fancontrol/scope_exit.hpp"

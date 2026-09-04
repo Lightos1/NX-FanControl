@@ -51,10 +51,6 @@ void __appInit(void) {
     if (R_FAILED(rc))
         diagAbortWithResult(MAKERESULT(Module_Libnx, LibnxError_ShouldNotHappen));
 
-    rc = apmInitialize();
-    if (R_FAILED(rc))
-        diagAbortWithResult(rc);
-
     smExit();
 }
 
@@ -64,7 +60,6 @@ void __appExit(void) {
     i2cExit();
     fsExit();
     fsdevUnmountAll();
-    apmExit();
 }
 
 #ifdef __cplusplus
