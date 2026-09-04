@@ -34,7 +34,7 @@ CurveStore* MainMenu::activeGraphCurve() {
 }
 
 tsl::elm::Element* MainMenu::createUI() {
-    auto frame = new tsl::elm::OverlayFrame("NX-FanControl", "v1.1.0");
+    auto frame = new tsl::elm::OverlayFrame("NX-FanControl", "v1.1.1");
 
     auto list = new tsl::elm::List();
 
