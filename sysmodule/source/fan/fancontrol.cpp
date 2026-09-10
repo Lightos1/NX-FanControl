@@ -163,6 +163,9 @@ static void RefreshConfig(const char *configSection, FanHysteresisState *fanStat
     if (IntervalElapsed(&lastCheckTime, MsToNs(ctx->refreshConfig.configRefreshIntervalMs))) {
         if (TryReloadConfig(configSection, fanState, lastCfgMTime)) {
             WriteLog("Config reloaded");
+            if (ctx->dockedOverride) {
+                WriteLog("dockedOverride");
+            }
         }
     }
 }
@@ -172,7 +175,11 @@ static bool HasDockChanged(bool newState) {
 }
 
 static void HandleDockRefresh(FanHysteresisState *fanState) {
+
     bool docked = IsDocked();
+    if (docked) {
+    }
+
     if (HasDockChanged(docked)) {
         ctx->isDocked = docked;
         SwapCurveTable(GetProfileCurve(), fanState);

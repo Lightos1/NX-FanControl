@@ -1,12 +1,23 @@
 #include <switch.h>
 #include "fancontrol/apm.hpp"
 #include "fancontrol/scope_exit.hpp"
+#include "fancontrol/log.hpp"
 
 namespace {
     Service service;
 
     Result ApmInititializeImpl() {
-        return smGetService(&service, "apm");
+        Result rc = smInitialize();
+        if (R_FAILED(rc)) {
+            return rc;
+        }
+
+        rc = smGetService(&service, "apm");
+        if (R_FAILED(rc)) {
+            smExit();
+        }
+
+        return rc;
     }
 
     Result ApmGetPerformanceModeImpl(ApmPerformanceMode *outPerformanceMode) {
@@ -15,6 +26,7 @@ namespace {
 
     void ApmExitImpl() {
         serviceClose(&service);
+        smExit();
     }
 
 }
